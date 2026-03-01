@@ -29,28 +29,33 @@
   .dot-coursera { background: var(--coursera); }
   .dot-x        { background: var(--x); }
   .dot-protein  { background: var(--protein); }
-  .dot-miss     { background: var(--miss); }
+
   .calendar-wrap { width: 100%; max-width: 720px; flex: 1; display: flex; flex-direction: column; min-height: 0; animation: fadeUp 0.5s 0.1s ease both; }
   .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 4px; }
   .weekday-label { text-align: center; font-size: 0.58rem; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; padding: 2px 0; }
   .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; flex: 1; }
+
   .day-cell {
     background: var(--empty); border: 1px solid var(--border); border-radius: 8px;
     padding: 5px 5px 4px; cursor: pointer; transition: transform 0.12s, border-color 0.12s;
     display: flex; flex-direction: column; gap: 3px; position: relative; user-select: none; min-height: 0;
   }
-  .day-cell:hover:not(.empty) { transform: translateY(-1px); border-color: var(--muted); }
+  .day-cell:hover { transform: translateY(-1px); border-color: var(--muted); }
   .day-cell.empty { background: transparent; border-color: transparent; cursor: default; pointer-events: none; }
   .day-cell.today { border-color: var(--coursera); }
   .day-number { font-size: 0.62rem; font-weight: 500; color: var(--muted); line-height: 1; }
   .day-cell.today .day-number { color: var(--coursera); }
+
   .day-status { position: absolute; top: 3px; right: 4px; font-size: 0.5rem; line-height: 1; }
+
   .habits { display: flex; flex-direction: column; gap: 2px; flex: 1; justify-content: flex-end; }
   .habit-pill { height: 3px; border-radius: 99px; background: var(--border); transition: background 0.2s; }
   .habit-pill.done-coursera { background: var(--coursera); }
   .habit-pill.done-x        { background: var(--x); }
   .habit-pill.done-protein  { background: var(--protein); }
   .habit-pill.missed        { background: var(--miss); opacity: 0.6; }
+
+  /* stats */
   .stats { width: 100%; max-width: 720px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; flex-shrink: 0; animation: fadeUp 0.5s 0.15s ease both; }
   .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; display: flex; flex-direction: column; gap: 5px; }
   .stat-header { display: flex; align-items: center; gap: 6px; }
@@ -70,8 +75,105 @@
   .stat-card.protein .stat-icon      { background: var(--protein); }
   .stat-card.protein .stat-bar-fill  { background: var(--protein); }
   .stat-card.protein .stat-big       { color: var(--protein); }
+
   .instructions { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.05em; text-align: center; flex-shrink: 0; animation: fadeUp 0.5s 0.2s ease both; }
   .instructions span { color: var(--text); }
+
+  /* POPUP */
+  .overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .overlay.open { display: flex; }
+
+  .popup {
+    background: #1c1c20;
+    border: 1px solid #3a3a3e;
+    border-radius: 14px;
+    padding: 20px 22px;
+    width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    animation: popIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.88); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .popup-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .popup-title span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    display: block;
+    margin-top: 3px;
+  }
+
+  .popup-habits { display: flex; flex-direction: column; gap: 8px; }
+
+  .habit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .habit-label {
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    flex: 1;
+  }
+
+  .habit-toggles { display: flex; gap: 5px; }
+
+  .toggle-btn {
+    width: 30px; height: 24px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--empty);
+    color: var(--muted);
+    font-size: 0.65rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .toggle-btn:hover { border-color: var(--muted); }
+  .toggle-btn.active-done { background: #1a3326; border-color: var(--coursera); color: var(--coursera); }
+  .toggle-btn.active-done.hx { background: #3a1e0a; border-color: var(--x); color: var(--x); }
+  .toggle-btn.active-done.hp { background: #2a1f40; border-color: var(--protein); color: var(--protein); }
+  .toggle-btn.active-miss { background: #2a0f0f; border-color: var(--miss); color: var(--miss); }
+
+  .popup-close {
+    background: var(--empty);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    padding: 7px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: border-color 0.15s, color 0.15s;
+    text-align: center;
+  }
+  .popup-close:hover { border-color: var(--muted); color: var(--text); }
+
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
@@ -80,10 +182,9 @@
 <header>
   <h1>March <em>2026</em></h1>
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot dot-coursera"></div>Coursera ✓</div>
-    <div class="legend-item"><div class="legend-dot dot-x"></div>No X ✓</div>
-    <div class="legend-item"><div class="legend-dot dot-protein"></div>Protein ✓</div>
-    <div class="legend-item"><div class="legend-dot dot-miss"></div>Missed</div>
+    <div class="legend-item"><div class="legend-dot dot-coursera"></div>Coursera</div>
+    <div class="legend-item"><div class="legend-dot dot-x"></div>No X</div>
+    <div class="legend-item"><div class="legend-dot dot-protein"></div>Protein</div>
   </div>
 </header>
 
@@ -127,48 +228,92 @@
   </div>
 </div>
 
-<p class="instructions">Click a day to cycle · <span>right-click to reset</span></p>
+<p class="instructions">Click any day to <span>mark your habits</span></p>
+
+<!-- POPUP -->
+<div class="overlay" id="overlay">
+  <div class="popup">
+    <div class="popup-title" id="popup-title">
+      March 1
+      <span>Mark each habit</span>
+    </div>
+    <div class="popup-habits">
+      <div class="habit-row">
+        <div class="habit-label">📚 Coursera 30min</div>
+        <div class="habit-toggles">
+          <button class="toggle-btn hc" id="btn-coursera-done" onclick="toggle('coursera','done')">✓</button>
+          <button class="toggle-btn" id="btn-coursera-miss" onclick="toggle('coursera','miss')">✗</button>
+        </div>
+      </div>
+      <div class="habit-row">
+        <div class="habit-label">🚫 No X Content</div>
+        <div class="habit-toggles">
+          <button class="toggle-btn hx" id="btn-x-done" onclick="toggle('x','done')">✓</button>
+          <button class="toggle-btn" id="btn-x-miss" onclick="toggle('x','miss')">✗</button>
+        </div>
+      </div>
+      <div class="habit-row">
+        <div class="habit-label">💪 +130g Protein</div>
+        <div class="habit-toggles">
+          <button class="toggle-btn hp" id="btn-protein-done" onclick="toggle('protein','done')">✓</button>
+          <button class="toggle-btn" id="btn-protein-miss" onclick="toggle('protein','miss')">✗</button>
+        </div>
+      </div>
+    </div>
+    <button class="popup-close" onclick="closePopup()">Done</button>
+  </div>
+</div>
 
 <script>
-  const STORAGE_KEY = 'march2026_v3';
+  const STORAGE_KEY = 'march2026_v4';
   let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
   const DAYS = 31, FIRST_DAY = 0, TODAY = 1;
   const HABITS = ['coursera', 'x', 'protein'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-  // Each click cycles one habit at a time (coursera → x → protein → back)
-  // We track which habit to cycle next per day
-  let cycleIndex = {};
+  let activeDay = null;
 
-  function cycleDay(day) {
-    if (!state[day]) state[day] = { coursera: null, x: null, protein: null };
-    if (cycleIndex[day] === undefined) cycleIndex[day] = 0;
+  function openPopup(day) {
+    activeDay = day;
+    const date = new Date(2026, 2, day); // March = 2
+    document.getElementById('popup-title').innerHTML =
+      `March ${day} <span>${WEEKDAYS[date.getDay()]} · mark each habit</span>`;
+    updatePopupButtons();
+    document.getElementById('overlay').classList.add('open');
+  }
 
-    const h = HABITS[cycleIndex[day]];
-    const cur = state[day][h];
-    state[day][h] = cur === null ? 'done' : cur === 'done' ? 'miss' : null;
+  function closePopup() {
+    document.getElementById('overlay').classList.remove('open');
+    activeDay = null;
+  }
 
-    // advance to next habit after full cycle (null→done→miss→null)
-    if (state[day][h] === null) {
-      cycleIndex[day] = (cycleIndex[day] + 1) % HABITS.length;
-    }
-
-    // if all null reset cycleIndex
-    if (HABITS.every(h => state[day][h] === null)) {
-      cycleIndex[day] = 0;
-      state[day] = null;
-    }
-
+  function toggle(habit, value) {
+    if (!activeDay) return;
+    if (!state[activeDay]) state[activeDay] = { coursera: null, x: null, protein: null };
+    // clicking same value = toggle off
+    state[activeDay][habit] = state[activeDay][habit] === value ? null : value;
+    // clear day if all null
+    if (HABITS.every(h => !state[activeDay][h])) state[activeDay] = null;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    updatePopupButtons();
     render();
   }
 
-  function resetDay(day, e) {
-    e.preventDefault();
-    state[day] = null;
-    cycleIndex[day] = 0;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    render();
+  function updatePopupButtons() {
+    const d = (activeDay && state[activeDay]) || { coursera: null, x: null, protein: null };
+    HABITS.forEach(h => {
+      const doneBtn = document.getElementById(`btn-${h}-done`);
+      const missBtn = document.getElementById(`btn-${h}-miss`);
+      doneBtn.className = 'toggle-btn h' + h[0] + (d[h] === 'done' ? ' active-done' : '');
+      missBtn.className = 'toggle-btn' + (d[h] === 'miss' ? ' active-miss' : '');
+    });
   }
+
+  // close on overlay click
+  document.getElementById('overlay').addEventListener('click', function(e) {
+    if (e.target === this) closePopup();
+  });
 
   function render() {
     const grid = document.getElementById('calendar');
@@ -183,8 +328,7 @@
     for (let day = 1; day <= DAYS; day++) {
       const cell = document.createElement('div');
       cell.className = 'day-cell' + (day === TODAY ? ' today' : '');
-      cell.onclick = () => cycleDay(day);
-      cell.oncontextmenu = (e) => resetDay(day, e);
+      cell.onclick = () => openPopup(day);
 
       const num = document.createElement('div');
       num.className = 'day-number';
@@ -205,7 +349,6 @@
 
       const habits = document.createElement('div');
       habits.className = 'habits';
-
       HABITS.forEach(h => {
         const p = document.createElement('div');
         p.className = 'habit-pill' + (d[h] === 'done' ? ` done-${h}` : d[h] === 'miss' ? ' missed' : '');
