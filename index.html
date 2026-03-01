@@ -3,349 +3,238 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Weekly Habit Tracker</title>
+<title>March 2026 — Habit Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #0e0e10; --surface: #17171a; --border: #2a2a2e;
     --text: #f0ede8; --muted: #6b6870;
-    --accent: #4ade80; --miss: #ef4444; --empty: #1f1f23;
+    --coursera: #4ade80; --x: #f97316; --protein: #a78bfa;
+    --miss: #ef4444; --empty: #1f1f23;
   }
   html, body { height: 100%; overflow: hidden; }
   body {
     background: var(--bg); color: var(--text);
     font-family: 'DM Mono', monospace;
     height: 100vh; display: flex; flex-direction: column;
-    align-items: center; padding: 16px 20px 12px; gap: 12px; overflow: hidden;
+    align-items: center; padding: 16px 20px 12px; gap: 10px; overflow: hidden;
   }
-
-  /* HEADER */
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    width: 100%; max-width: 720px; flex-shrink: 0;
-    animation: fadeUp 0.5s ease both;
+  header { display: flex; align-items: baseline; gap: 16px; flex-shrink: 0; animation: fadeUp 0.5s ease both; }
+  header h1 { font-family: 'DM Serif Display', serif; font-size: 1.6rem; letter-spacing: -0.02em; line-height: 1; }
+  header h1 em { font-style: italic; color: var(--coursera); }
+  .legend { display: flex; gap: 14px; flex-shrink: 0; animation: fadeUp 0.5s 0.05s ease both; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.07em; }
+  .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot-coursera { background: var(--coursera); }
+  .dot-x        { background: var(--x); }
+  .dot-protein  { background: var(--protein); }
+  .dot-miss     { background: var(--miss); }
+  .calendar-wrap { width: 100%; max-width: 720px; flex: 1; display: flex; flex-direction: column; min-height: 0; animation: fadeUp 0.5s 0.1s ease both; }
+  .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 4px; }
+  .weekday-label { text-align: center; font-size: 0.58rem; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; padding: 2px 0; }
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; flex: 1; }
+  .day-cell {
+    background: var(--empty); border: 1px solid var(--border); border-radius: 8px;
+    padding: 5px 5px 4px; cursor: pointer; transition: transform 0.12s, border-color 0.12s;
+    display: flex; flex-direction: column; gap: 3px; position: relative; user-select: none; min-height: 0;
   }
-  header h1 { font-family: 'DM Serif Display', serif; font-size: 1.5rem; letter-spacing: -0.02em; line-height: 1; }
-  header h1 em { font-style: italic; color: var(--accent); }
-  .week-nav { display: flex; align-items: center; gap: 10px; }
-  .week-label { font-size: 0.78rem; color: var(--muted); white-space: normal; overflow: visible; max-width: 140px; letter-spacing: 0.08em; min-width: 130px; text-align: center; }
-  .nav-btn {
-    background: var(--empty); border: 1px solid var(--border);
-    border-radius: 6px; color: var(--muted); width: 26px; height: 26px;
-    cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; justify-content: center;
-    transition: border-color 0.15s, color 0.15s; font-family: 'DM Mono', monospace;
-  }
-  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .nav-btn:disabled { opacity: 0.3; cursor: default; }
-  .nav-btn:disabled:hover { border-color: var(--border); color: var(--muted); }
-
-  /* TABLE */
-  .table-wrap {
-    width: 100%; max-width: 720px;
-
-    animation: fadeUp 0.5s 0.1s ease both;
-  }
-
-  table { width: 100%; border-collapse: separate; border-spacing: 4px; table-layout: fixed; }
-
-  th {
-    font-size: 0.6rem; letter-spacing: 0.12em; color: var(--muted);
-    text-transform: uppercase; padding: 4px 2px; text-align: center;
-    font-weight: 400;
-  }
-  th.habit-col { text-align: left; padding-left: 6px; width: 140px; }
-
-  tr { height: 44px; }
-  td {
-    background: var(--empty); border: 1px solid var(--border);
-    border-radius: 8px; text-align: center; vertical-align: middle;
-    cursor: pointer; transition: border-color 0.12s, background 0.15s;
-    font-size: 0.85rem; height: 44px; max-height: 44px;
-  }
-  td:hover { border-color: var(--muted); transform: scale(1.04); }
-  td.habit-name {
-    background: transparent; border-color: transparent;
-    text-align: left; font-size: 0.78rem; color: var(--muted); white-space: normal; overflow: visible; max-width: 140px;
-    letter-spacing: 0.06em; padding-left: 4px; cursor: default;
-  }
-  td.habit-name:hover { transform: none; border-color: transparent; }
-  td.today-col { border-color: #3a3a3e; }
-  td.done { background: #1a3326; border-color: var(--accent); }
-  td.miss { background: #2a0f0f; border-color: var(--miss); }
-
-  /* STATS */
-  .stats {
-    width: 100%; max-width: 720px;
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 6px; flex-shrink: 0;
-    animation: fadeUp 0.5s 0.15s ease both;
-  }
-  .stat-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 7px 10px;
-    display: flex; flex-direction: column; gap: 4px;
-  }
-  .stat-name { font-size: 0.52rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .day-cell:hover:not(.empty) { transform: translateY(-1px); border-color: var(--muted); }
+  .day-cell.empty { background: transparent; border-color: transparent; cursor: default; pointer-events: none; }
+  .day-cell.today { border-color: var(--coursera); }
+  .day-number { font-size: 0.62rem; font-weight: 500; color: var(--muted); line-height: 1; }
+  .day-cell.today .day-number { color: var(--coursera); }
+  .day-status { position: absolute; top: 3px; right: 4px; font-size: 0.5rem; line-height: 1; }
+  .habits { display: flex; flex-direction: column; gap: 2px; flex: 1; justify-content: flex-end; }
+  .habit-pill { height: 3px; border-radius: 99px; background: var(--border); transition: background 0.2s; }
+  .habit-pill.done-coursera { background: var(--coursera); }
+  .habit-pill.done-x        { background: var(--x); }
+  .habit-pill.done-protein  { background: var(--protein); }
+  .habit-pill.missed        { background: var(--miss); opacity: 0.6; }
+  .stats { width: 100%; max-width: 720px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; flex-shrink: 0; animation: fadeUp 0.5s 0.15s ease both; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; display: flex; flex-direction: column; gap: 5px; }
+  .stat-header { display: flex; align-items: center; gap: 6px; }
+  .stat-icon { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .stat-name { font-size: 0.58rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
   .stat-bar-track { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; }
-  .stat-bar-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .stat-bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .stat-numbers { display: flex; justify-content: space-between; align-items: baseline; }
-  .stat-big { font-family: 'DM Serif Display', serif; font-size: 1.1rem; line-height: 1; color: var(--accent); }
-  .stat-pct { font-size: 0.52rem; color: var(--muted); }
-
+  .stat-big { font-family: 'DM Serif Display', serif; font-size: 1.4rem; line-height: 1; }
+  .stat-pct { font-size: 0.58rem; color: var(--muted); }
+  .stat-card.coursera .stat-icon     { background: var(--coursera); }
+  .stat-card.coursera .stat-bar-fill { background: var(--coursera); }
+  .stat-card.coursera .stat-big      { color: var(--coursera); }
+  .stat-card.xfree .stat-icon        { background: var(--x); }
+  .stat-card.xfree .stat-bar-fill    { background: var(--x); }
+  .stat-card.xfree .stat-big         { color: var(--x); }
+  .stat-card.protein .stat-icon      { background: var(--protein); }
+  .stat-card.protein .stat-bar-fill  { background: var(--protein); }
+  .stat-card.protein .stat-big       { color: var(--protein); }
   .instructions { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.05em; text-align: center; flex-shrink: 0; animation: fadeUp 0.5s 0.2s ease both; }
   .instructions span { color: var(--text); }
-
-  /* POPUP */
-  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
-  .overlay.open { display: flex; }
-  .popup {
-    background: #1c1c20; border: 1px solid #3a3a3e; border-radius: 14px;
-    padding: 20px 22px; width: 240px; display: flex; flex-direction: column; gap: 14px;
-    animation: popIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  @keyframes popIn { from { opacity: 0; transform: scale(0.88); } to { opacity: 1; transform: scale(1); } }
-  .popup-title { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--text); line-height: 1; }
-  .popup-title span { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--muted); white-space: normal; overflow: visible; max-width: 140px; display: block; margin-top: 3px; }
-  .popup-habits { display: flex; flex-direction: column; gap: 8px; }
-  .habit-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .habit-label { font-size: 0.78rem; color: var(--muted); white-space: normal; overflow: visible; max-width: 140px; letter-spacing: 0.05em; flex: 1; }
-  .habit-toggles { display: flex; gap: 5px; }
-  .toggle-btn {
-    width: 30px; height: 24px; border-radius: 6px; border: 1px solid var(--border);
-    background: var(--empty); color: var(--muted); font-size: 0.65rem;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; font-family: 'DM Mono', monospace;
-  }
-  .toggle-btn:hover { border-color: var(--muted); }
-  .toggle-btn.active-done { background: #1a3326; border-color: var(--accent); color: var(--accent); }
-  .toggle-btn.active-miss { background: #2a0f0f; border-color: var(--miss); color: var(--miss); }
-  .popup-close {
-    background: var(--empty); border: 1px solid var(--border); border-radius: 8px;
-    color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.65rem;
-    padding: 7px; cursor: pointer; letter-spacing: 0.08em;
-    transition: border-color 0.15s, color 0.15s; text-align: center;
-  }
-  .popup-close:hover { border-color: var(--muted); color: var(--text); }
-
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
 
 <header>
-  
-  <div class="week-nav">
-    <button class="nav-btn" id="btn-prev" onclick="changeWeek(-1)">&#8592;</button>
-    <div class="week-label" id="week-label"></div>
-    <button class="nav-btn" id="btn-next" onclick="changeWeek(1)">&#8594;</button>
+  <h1>March <em>2026</em></h1>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot dot-coursera"></div>Coursera ✓</div>
+    <div class="legend-item"><div class="legend-dot dot-x"></div>No X ✓</div>
+    <div class="legend-item"><div class="legend-dot dot-protein"></div>Protein ✓</div>
+    <div class="legend-item"><div class="legend-dot dot-miss"></div>Missed</div>
   </div>
 </header>
 
-<div class="table-wrap">
-  <table id="habit-table">
-    <thead>
-      <tr>
-        <th class="habit-col">Habit</th>
-        <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
-      </tr>
-    </thead>
-    <tbody id="table-body"></tbody>
-  </table>
+<div class="calendar-wrap">
+  <div class="weekdays">
+    <div class="weekday-label">Sun</div>
+    <div class="weekday-label">Mon</div>
+    <div class="weekday-label">Tue</div>
+    <div class="weekday-label">Wed</div>
+    <div class="weekday-label">Thu</div>
+    <div class="weekday-label">Fri</div>
+    <div class="weekday-label">Sat</div>
+  </div>
+  <div class="calendar-grid" id="calendar"></div>
 </div>
 
-<div class="stats" id="stats"></div>
-
-<p class="instructions">Click a cell to mark · <span>right-click to reset</span></p>
-
-<!-- POPUP -->
-<div class="overlay" id="overlay">
-  <div class="popup">
-    <div class="popup-title" id="popup-title">Monday<span>Mark habit</span></div>
-    <div class="popup-habits" id="popup-habits"></div>
-    <button class="popup-close" onclick="closePopup()">Done</button>
+<div class="stats">
+  <div class="stat-card coursera">
+    <div class="stat-header"><div class="stat-icon"></div><div class="stat-name">Coursera 30min</div></div>
+    <div class="stat-numbers">
+      <div class="stat-big" id="coursera-count">0</div>
+      <div class="stat-pct"><span id="coursera-pct">0%</span> done</div>
+    </div>
+    <div class="stat-bar-track"><div class="stat-bar-fill" id="coursera-bar" style="width:0%"></div></div>
+  </div>
+  <div class="stat-card xfree">
+    <div class="stat-header"><div class="stat-icon"></div><div class="stat-name">No X Content</div></div>
+    <div class="stat-numbers">
+      <div class="stat-big" id="x-count">0</div>
+      <div class="stat-pct"><span id="x-pct">0%</span> done</div>
+    </div>
+    <div class="stat-bar-track"><div class="stat-bar-fill" id="x-bar" style="width:0%"></div></div>
+  </div>
+  <div class="stat-card protein">
+    <div class="stat-header"><div class="stat-icon"></div><div class="stat-name">+130g Protein</div></div>
+    <div class="stat-numbers">
+      <div class="stat-big" id="protein-count">0</div>
+      <div class="stat-pct"><span id="protein-pct">0%</span> done</div>
+    </div>
+    <div class="stat-bar-track"><div class="stat-bar-fill" id="protein-bar" style="width:0%"></div></div>
   </div>
 </div>
 
+<p class="instructions">Click a day to cycle · <span>right-click to reset</span></p>
+
 <script>
-  const STORAGE_KEY = 'weekly_habits_v1';
-  const HABITS = [
-    { id: 'wakeup',      label: '⏰ Wake-Up Early' },
-    { id: 'nodistr',     label: '🧘 M.R No Distractions' },
-    { id: 'reading',     label: '📖 Reading' },
-    { id: 'unistudy',    label: '🎓 Uni Study' },
-    { id: 'gym',         label: '🏋️ Gym' },
-    { id: 'cscourse',    label: '💻 CS Course' },
-  ];
-  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-
-  // state: { [weekKey]: { [dayIndex]: { [habitId]: 'done'|'miss'|null } } }
+  const STORAGE_KEY = 'march2026_v3';
   let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  const DAYS = 31, FIRST_DAY = 0, TODAY = 1;
+  const HABITS = ['coursera', 'x', 'protein'];
 
-  // current week offset (0 = this week, -1 = last week, etc.)
-  let weekOffset = 0;
+  // Each click cycles one habit at a time (coursera → x → protein → back)
+  // We track which habit to cycle next per day
+  let cycleIndex = {};
 
-  // popup context
-  let activeWeekKey = null, activeDayIdx = null;
+  function cycleDay(day) {
+    if (!state[day]) state[day] = { coursera: null, x: null, protein: null };
+    if (cycleIndex[day] === undefined) cycleIndex[day] = 0;
 
-  function getMonday(offset) {
-    const now = new Date();
-    const day = now.getDay(); // 0=Sun
-    const diffToMon = -day;
-    const mon = new Date(now);
-    mon.setDate(now.getDate() + diffToMon + offset * 7);
-    mon.setHours(0,0,0,0);
-    return mon;
-  }
+    const h = HABITS[cycleIndex[day]];
+    const cur = state[day][h];
+    state[day][h] = cur === null ? 'done' : cur === 'done' ? 'miss' : null;
 
-  function weekKey(monday) {
-    return monday.toISOString().slice(0,10);
-  }
-
-  function formatWeekLabel(monday) {
-    const sun = new Date(monday); sun.setDate(monday.getDate() + 6);
-    const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    return `${fmt(monday)} – ${fmt(sun)}`;
-  }
-
-  function todayDayIdx() {
-    const d = new Date().getDay();
-    return d; // Sun=0 ... Sat=6
-  }
-
-  function isCurrentWeek() {
-    return weekOffset === 0;
-  }
-
-  function getDayDate(monday, dayIdx) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + dayIdx);
-    return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  }
-
-  function getCell(wk, dayIdx, habitId) {
-    return state[wk]?.[dayIdx]?.[habitId] ?? null;
-  }
-
-  function setCell(wk, dayIdx, habitId, value) {
-    if (!state[wk]) state[wk] = {};
-    if (!state[wk][dayIdx]) state[wk][dayIdx] = {};
-    state[wk][dayIdx][habitId] = value;
-    // clean up nulls
-    if (HABITS.every(h => !state[wk][dayIdx][h.id])) delete state[wk][dayIdx];
-    if (Object.keys(state[wk]).length === 0) delete state[wk];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }
-
-  function resetCell(wk, dayIdx) {
-    if (state[wk]?.[dayIdx]) {
-      delete state[wk][dayIdx];
-      if (Object.keys(state[wk]).length === 0) delete state[wk];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    // advance to next habit after full cycle (null→done→miss→null)
+    if (state[day][h] === null) {
+      cycleIndex[day] = (cycleIndex[day] + 1) % HABITS.length;
     }
-  }
 
-  function openPopup(wk, dayIdx, monday) {
-    activeWeekKey = wk; activeDayIdx = dayIdx;
-    document.getElementById('popup-title').innerHTML =
-      `${DAYS[dayIdx]}<span>${getDayDate(monday, dayIdx)}</span>`;
-    renderPopupHabits();
-    document.getElementById('overlay').classList.add('open');
-  }
+    // if all null reset cycleIndex
+    if (HABITS.every(h => state[day][h] === null)) {
+      cycleIndex[day] = 0;
+      state[day] = null;
+    }
 
-  function closePopup() {
-    document.getElementById('overlay').classList.remove('open');
-    activeWeekKey = null; activeDayIdx = null;
-  }
-
-  function toggle(habitId, value) {
-    if (activeWeekKey === null) return;
-    const cur = getCell(activeWeekKey, activeDayIdx, habitId);
-    setCell(activeWeekKey, activeDayIdx, habitId, cur === value ? null : value);
-    renderPopupHabits();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     render();
   }
 
-  function renderPopupHabits() {
-    const container = document.getElementById('popup-habits');
-    container.innerHTML = '';
-    HABITS.forEach(h => {
-      const val = getCell(activeWeekKey, activeDayIdx, h.id);
-      const row = document.createElement('div');
-      row.className = 'habit-row';
-      row.innerHTML = `
-        <div class="habit-label">${h.label}</div>
-        <div class="habit-toggles">
-          <button class="toggle-btn ${val === 'done' ? 'active-done' : ''}" onclick="toggle('${h.id}','done')">✓</button>
-          <button class="toggle-btn ${val === 'miss' ? 'active-miss' : ''}" onclick="toggle('${h.id}','miss')">✗</button>
-        </div>`;
-      container.appendChild(row);
-    });
-  }
-
-  document.getElementById('overlay').addEventListener('click', function(e) {
-    if (e.target === this) closePopup();
-  });
-
-  function changeWeek(dir) {
-    weekOffset += dir;
+  function resetDay(day, e) {
+    e.preventDefault();
+    state[day] = null;
+    cycleIndex[day] = 0;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     render();
   }
 
   function render() {
-    const monday = getMonday(weekOffset);
-    const wk = weekKey(monday);
-    const todayIdx = isCurrentWeek() ? todayDayIdx() : -1;
+    const grid = document.getElementById('calendar');
+    grid.innerHTML = '';
 
-    // nav buttons
-    document.getElementById('week-label').textContent = formatWeekLabel(monday);
-    document.getElementById('btn-next').disabled = weekOffset >= 0;
+    for (let i = 0; i < FIRST_DAY; i++) {
+      const e = document.createElement('div');
+      e.className = 'day-cell empty';
+      grid.appendChild(e);
+    }
 
-    // table body
-    const tbody = document.getElementById('table-body');
-    tbody.innerHTML = '';
+    for (let day = 1; day <= DAYS; day++) {
+      const cell = document.createElement('div');
+      cell.className = 'day-cell' + (day === TODAY ? ' today' : '');
+      cell.onclick = () => cycleDay(day);
+      cell.oncontextmenu = (e) => resetDay(day, e);
 
-    HABITS.forEach(h => {
-      const tr = document.createElement('tr');
+      const num = document.createElement('div');
+      num.className = 'day-number';
+      num.textContent = day;
+      cell.appendChild(num);
 
-      const nameTd = document.createElement('td');
-      nameTd.className = 'habit-name';
-      nameTd.textContent = h.label;
-      tr.appendChild(nameTd);
+      const d = state[day] || { coursera: null, x: null, protein: null };
+      const hasSome = HABITS.some(h => d[h]);
 
-      DAYS.forEach((_, dayIdx) => {
-        const td = document.createElement('td');
-        const val = getCell(wk, dayIdx, h.id);
-        td.className = (dayIdx === todayIdx ? 'today-col ' : '') + (val === 'done' ? 'done' : val === 'miss' ? 'miss' : '');
-        td.textContent = val === 'done' ? '✅' : val === 'miss' ? '❌' : '';
-        td.onclick = () => openPopup(wk, dayIdx, monday);
-        td.oncontextmenu = (e) => { e.preventDefault(); resetCell(wk, dayIdx); render(); };
-        tr.appendChild(td);
+      if (hasSome) {
+        const status = document.createElement('div');
+        status.className = 'day-status';
+        const allDone = HABITS.every(h => d[h] === 'done');
+        const allMiss = HABITS.every(h => d[h] === 'miss');
+        status.textContent = allDone ? '✅' : allMiss ? '❌' : '〜';
+        cell.appendChild(status);
+      }
+
+      const habits = document.createElement('div');
+      habits.className = 'habits';
+
+      HABITS.forEach(h => {
+        const p = document.createElement('div');
+        p.className = 'habit-pill' + (d[h] === 'done' ? ` done-${h}` : d[h] === 'miss' ? ' missed' : '');
+        habits.appendChild(p);
       });
 
-      tbody.appendChild(tr);
-    });
+      cell.appendChild(habits);
+      grid.appendChild(cell);
+    }
 
-    // stats
-    const statsEl = document.getElementById('stats');
-    statsEl.innerHTML = '';
+    updateStats();
+  }
+
+  function updateStats() {
+    let counts = { coursera: 0, x: 0, protein: 0 };
+    let tracked = 0;
+    for (let day = 1; day <= DAYS; day++) {
+      const d = state[day];
+      if (d && HABITS.some(h => d[h])) {
+        tracked++;
+        HABITS.forEach(h => { if (d[h] === 'done') counts[h]++; });
+      }
+    }
+    const base = tracked || 1;
     HABITS.forEach(h => {
-      let done = 0, tracked = 0;
-      DAYS.forEach((_, dayIdx) => {
-        const val = getCell(wk, dayIdx, h.id);
-        if (val) { tracked++; if (val === 'done') done++; }
-      });
-      const pct = tracked ? Math.round((done / tracked) * 100) : 0;
-      const card = document.createElement('div');
-      card.className = 'stat-card';
-      card.innerHTML = `
-        <div class="stat-name">${h.label.replace(/^\S+\s/, '')}</div>
-        <div class="stat-numbers">
-          <div class="stat-big">${done}</div>
-          <div class="stat-pct">${pct}%</div>
-        </div>
-        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${pct}%"></div></div>`;
-      statsEl.appendChild(card);
+      const pct = Math.round((counts[h] / base) * 100);
+      document.getElementById(`${h}-count`).textContent = counts[h];
+      document.getElementById(`${h}-pct`).textContent = pct + '%';
+      document.getElementById(`${h}-bar`).style.width = pct + '%';
     });
   }
 
