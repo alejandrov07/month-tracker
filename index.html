@@ -173,6 +173,20 @@
     text-align: center;
   }
   .popup-close:hover { border-color: var(--muted); color: var(--text); }
+  .popup-reset {
+    background: var(--empty);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--miss);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    padding: 7px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: border-color 0.15s, color 0.15s;
+    text-align: center;
+  }
+  .popup-reset:hover { border-color: var(--miss); }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
@@ -260,6 +274,7 @@
         </div>
       </div>
     </div>
+    <button class="popup-reset" onclick="resetDay()">Reset day</button>
     <button class="popup-close" onclick="closePopup()">Done</button>
   </div>
 </div>
@@ -300,6 +315,14 @@
     render();
   }
 
+  function resetDay() {
+    if (!activeDay) return;
+    state[activeDay] = null;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    updatePopupButtons();
+    render();
+  }
+
   function updatePopupButtons() {
     const d = (activeDay && state[activeDay]) || { coursera: null, x: null, protein: null };
     HABITS.forEach(h => {
@@ -329,6 +352,7 @@
       const cell = document.createElement('div');
       cell.className = 'day-cell' + (day === TODAY ? ' today' : '');
       cell.onclick = () => openPopup(day);
+      cell.oncontextmenu = (e) => { e.preventDefault(); state[day] = null; localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); render(); };
 
       const num = document.createElement('div');
       num.className = 'day-number';
